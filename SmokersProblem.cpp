@@ -58,12 +58,12 @@ void fumante (int recurso){
         
         pode_pegar = false;
         
-        std::cout << "fumante que tem " << getRecursoString(meu_recurso_infinito) << " está fumando " << '\n';
+        std::cout << "fumante que tem " << getRecursoString(meu_recurso_infinito) << " estÃ¡ fumando " << '\n';
         
         recurso_disponivel_1 = -1;
         recurso_disponivel_2 = -1;
         
-        std::cout << "fumante que tem " << getRecursoString(meu_recurso_infinito) << " parou de fumar " << '\n';
+        std::cout << "fumante que tem " << getRecursoString(meu_recurso_infinito) << " parou de fumar " << "\n\n\n";
         
         
         vez_do_agente.notify_one(); //avisa o agente que pode fornecer de novo.
@@ -74,12 +74,12 @@ void fumante (int recurso){
 void agente(){
     int i = 0;
     
-    while(i < 3){
+    while(i < 10){
         std::unique_lock<std::mutex> lck(mtx_agente);
         
         while(pode_pegar) vez_do_agente.wait(lck); //espero terem fumado para colocar os recursos novamente
         
-        std::cout << "agente está disponbilizando os recursos " << '\n';
+        std::cout << "agente estÃ¡ disponbilizando os recursos " << "\n";
         
         std::vector<int> vec_de_recursos (recursos, recursos + sizeof(recursos) / sizeof(int) );
         
@@ -93,19 +93,24 @@ void agente(){
         
         vec_de_recursos.clear();
     
-        std::cout << "agente disponibilizou " << getRecursoString(recurso_disponivel_1) << " e " << getRecursoString(recurso_disponivel_2) << '\n';
+        std::cout << "agente disponibilizou " << getRecursoString(recurso_disponivel_1) << " e " << getRecursoString(recurso_disponivel_2) << "\n";
         
         pode_pegar = true; //permite que peguem os recursos
         
         int recs = recurso_disponivel_1 + recurso_disponivel_2;
         
-        if(recs == 3)
-            vez_do[0].notify_one(); //avisa o fumante que precisa de fumo pode pegar os recursos.
-        if(recs == 2)
-            vez_do[1].notify_one(); //avisa o fumante que precisa de papel pode fornecer pegar os recursos.
-        if(recs == 1)
-            vez_do[2].notify_one(); //avisa o fumante que precisa de isqueiro pode fornecer pegar os recursos.
-            
+        if(recs == 3){
+            std::cout << "avisando o fumante que tem " << getRecursoString(0) << "\n\n\n";
+            vez_do[0].notify_one(); //avisa o fumante que tem  fumo para pegar os recursos.
+        }
+        if(recs == 2){
+            std::cout << "avisando o fumante que tem " << getRecursoString(1) << "\n\n\n";
+            vez_do[1].notify_one(); //avisa o fumante que tem  papel para pegar os recursos.
+        }
+        if(recs == 1){
+            std::cout << "avisando o fumante que tem " << getRecursoString(2) << "\n\n\n";
+            vez_do[2].notify_one(); //avisa o fumante que tem  isqueiro para pegar os recursos.
+        }    
         i++;
     
     }
@@ -114,20 +119,20 @@ void agente(){
 
 int main()
 {
-    std::cout << "agente disponibilizou " << getRecursoString(1) << " e " << getRecursoString(2) << '\n';
-    
-     std::unique_lock<std::mutex> lck(mtx_agente);
-     vez_do_agente.notify_one();
-     
-    std::cout << "agente disponibilizou " << getRecursoString(1) << " e " << getRecursoString(2) << '\n';
-    
+
     std::thread A(fumante,0);
     std::thread B(fumante,1);
     std::thread C(fumante,2);
     
     std::thread Agente(agente);
+    
+
+    vez_do_agente.notify_one();
 
     Agente.join();
     
     std::cout << "agente terminou suas tarefas "<<'\n';
+    
+    return 0;
+    
 }

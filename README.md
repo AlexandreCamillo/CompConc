@@ -1,1 +1,2 @@
-# Trabalhos_CompConc
+# Computação Concorrente
+## Smokers Problem
